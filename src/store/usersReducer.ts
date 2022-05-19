@@ -99,7 +99,6 @@ export const pagingSelector = (state: RootState) => ({
   isLastPage: state.users.isLastPage,
   queueLength: state.users.users.length,
 });
-
 export const userDetaisSelector = (state: RootState) => state.users.userDetails;
 
 export const { dequeueUser, enqueueHistory } = usersSlice.actions;

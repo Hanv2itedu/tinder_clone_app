@@ -20,10 +20,13 @@ export const TinderCard = (props: TinderCardProps) => {
   if (!props.data) {
     return null;
   }
+
   const { firstName, lastName, picture, id, age } = props.data;
+
   const _onPress = () => {
     props.onViewDetailPress?.(props.data);
   };
+
   return (
     <View key={`TinderCard_${id}`} style={styles.cardContainer}>
       <ImageBackground

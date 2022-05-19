@@ -43,6 +43,7 @@ const screenOptions: StackNavigationOptions = {
   headerTitleAlign: 'center',
   headerBackTitleVisible: false,
 };
+
 const stackProps = {
   mode: 'card' as any,
   screenOptions,

@@ -41,7 +41,6 @@ export type AppThunk<ReturnType = void> = ThunkAction<
   unknown,
   Action<string>
 >;
+export const persistor = persistStore(store);
 
 export default store;
-
-export const persistor = persistStore(store);

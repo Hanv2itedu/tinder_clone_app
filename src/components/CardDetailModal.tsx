@@ -22,6 +22,7 @@ export const CardDetailModal = (props: CardDetailModalProps) => {
   const { data, isVisble, onClose } = props;
   const { picture, firstName, lastName, age, email, location, phone, gender } =
     data || {};
+
   return (
     <Modal
       animationType="slide"

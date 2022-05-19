@@ -29,6 +29,7 @@ const TabBarButton = ({
 
 const activeTintColor = 'red';
 const inactiveTintColor = 'grey';
+
 export const TabBar = ({ navigation, state }: BottomTabBarProps) => {
   const { routes } = state;
   const renderTab = (

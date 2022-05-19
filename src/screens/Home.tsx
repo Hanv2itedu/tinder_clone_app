@@ -17,13 +17,16 @@ import { Status } from '../types/users';
 import { useAppDispatch } from '../utils/hook';
 
 const Home = () => {
-  const [isModalShow, setModalShow] = useState(false);
-
   const dispatch = useAppDispatch();
   const { page, isLastPage, queueLength } = useSelector(pagingSelector);
   const currentUser = useSelector(currentUserSelector);
   const nextUser = useSelector(nextUserSelector);
   const userDetails = useSelector(userDetaisSelector);
+  const currentProfile = currentUser
+    ? { ...currentUser, ...userDetails[currentUser.id] }
+    : null;
+
+  const [isModalShow, setModalShow] = useState(false);
 
   const onLoadMore = useCallback(() => {
     !isLastPage && dispatch(fetchUsersAsync(page));
@@ -35,10 +38,6 @@ const Home = () => {
     }
   }, [isLastPage, queueLength, onLoadMore]);
 
-  const _onSwipe = (status: Status) => {
-    dispatch(onSwipe(status));
-  };
-
   useEffect(() => {
     !!currentUser && dispatch(fetchUserDetailAsync(currentUser.id));
   }, [currentUser, dispatch]);
@@ -46,9 +45,9 @@ const Home = () => {
   const onShowModal = () => setModalShow(true);
   const onHideModal = () => setModalShow(false);
 
-  const currentProfile = currentUser
-    ? { ...currentUser, ...userDetails[currentUser.id] }
-    : null;
+  const _onSwipe = (status: Status) => {
+    dispatch(onSwipe(status));
+  };
 
   return (
     <View style={styles.containerStyle}>

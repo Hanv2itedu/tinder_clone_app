@@ -2,6 +2,7 @@ import { User, UserDetail } from '../types/users';
 import API from './generalApi';
 
 export const LIMIT = 20;
+
 export const fetchUsers = (
   page: number,
 ): Promise<{ data: User[]; total: number }> =>

@@ -10,20 +10,19 @@ import {
 
 const History = () => {
   const { touchedUsers } = useSelector(touchedUsersSelector);
-  const [index, setIndex] = useState(0);
-
   const userDetails = useSelector(userDetaisSelector);
 
+  const [index, setIndex] = useState(0);
   const [isModalShow, setModalShow] = useState(false);
+
   const currentUser = touchedUsers.peekNext(index);
   const nextUser = touchedUsers.peekNext(index + 1);
-
-  const onShowModal = () => setModalShow(true);
-  const onHideModal = () => setModalShow(false);
-
   const currentProfile = currentUser
     ? { ...currentUser, ...userDetails[currentUser.id] }
     : null;
+
+  const onShowModal = () => setModalShow(true);
+  const onHideModal = () => setModalShow(false);
 
   const onSwipe = () => {
     setIndex(index + 1);
