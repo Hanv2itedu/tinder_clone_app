@@ -28,12 +28,16 @@ export class Queue<T> {
     return item;
   }
 
+  getHead() {
+    return this.head;
+  }
+
   peek() {
     return this.elements[this.head];
   }
 
-  peekNext() {
-    return this.elements[this.head + 1];
+  peekNext(step: number = 1) {
+    return this.elements[this.head + step];
   }
 
   get length() {

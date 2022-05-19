@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Dimensions, LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import {
+  Dimensions,
+  LayoutChangeEvent,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {
   PanGestureHandler,
   PanGestureHandlerGestureEvent,
@@ -13,7 +19,14 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { User } from '../types/users';
+import { Status, User } from '../types/users';
+import { TinderCard } from './TinderCard';
+
+const STATUS_COLORS = {
+  [Status.LIKED]: 'green',
+  [Status.NOPED]: 'red',
+  [Status.SUPPER_LIKED]: 'blue',
+};
 
 const ROTATION = 60;
 
@@ -24,11 +37,11 @@ interface CardsStackProps {
   currentProfile?: User | null;
   nextProfile?: User | null;
   onSwipe: (isLeft: boolean) => void;
-  renderItem: Function;
+  onViewDetailPress: () => void;
 }
 
 const CardsStack = (props: CardsStackProps) => {
-  const { renderItem, onSwipe, currentProfile, nextProfile } = props;
+  const { onSwipe, currentProfile, nextProfile, onViewDetailPress } = props;
   const [cardHeight, setCardHeight] = useState(0);
 
   const hiddenTranslateX = 2 * screenWidth;
@@ -93,7 +106,7 @@ const CardsStack = (props: CardsStackProps) => {
       startY.value = context.startY;
     },
     onEnd: event => {
-      if (translateX.value > 0.5 * screenWidth) {
+      if (Math.abs(translateX.value) > 0.5 * screenWidth) {
         translateX.value = withSpring(
           hiddenTranslateX * Math.sign(event.velocityX),
           {},
@@ -117,13 +130,34 @@ const CardsStack = (props: CardsStackProps) => {
     setCardHeight(height);
   };
 
+  const currentStatus = currentProfile?.status;
+
+  const renderStatus = (status: Status) => {
+    return (
+      <Text
+        style={[
+          styles.status,
+          {
+            color: STATUS_COLORS[status],
+            borderColor: STATUS_COLORS[status],
+          },
+          currentStatus === Status.NOPED ? styles.nopeStyle : styles.yesStyle,
+        ]}>
+        {currentStatus}
+      </Text>
+    );
+  };
+
   return (
     <>
       <View style={styles.root}>
         {nextProfile && (
           <View style={styles.nextCardContainer}>
             <Animated.View style={[styles.animatedCard, nextCardStyle]}>
-              {renderItem(nextProfile)}
+              <TinderCard
+                data={nextProfile}
+                onViewDetailPress={onViewDetailPress}
+              />
             </Animated.View>
           </View>
         )}
@@ -133,7 +167,11 @@ const CardsStack = (props: CardsStackProps) => {
             <Animated.View
               style={[styles.animatedCard, cardStyle]}
               onLayout={onMeasureLayout}>
-              {renderItem(currentProfile)}
+              <TinderCard
+                data={currentProfile}
+                onViewDetailPress={onViewDetailPress}
+              />
+              {currentStatus && renderStatus(currentStatus)}
             </Animated.View>
           </PanGestureHandler>
         )}
@@ -164,6 +202,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
   },
+  status: {
+    fontSize: 30,
+    borderRadius: 10,
+    borderWidth: 3,
+    paddingHorizontal: 10,
+    position: 'absolute',
+    top: 20,
+  },
+  nopeStyle: { transform: [{ rotate: '-15deg' }], left: 10 },
+  yesStyle: { transform: [{ rotate: '15deg' }], right: 10 },
 });
 
 export default CardsStack;

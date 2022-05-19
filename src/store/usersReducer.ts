@@ -6,12 +6,12 @@ import {
 import moment from 'moment';
 import { fetchUserDetail, fetchUsers, LIMIT } from '../services/userApi';
 import { Queue } from '../types/Queue';
-import { User, UserDetail } from '../types/users';
+import { Status, User, UserDetail } from '../types/users';
 
 export interface UsersState {
   page: number; // cursor for back-end data, prevent load the user twice or more
   users: Queue<User>; // waitting queue
-  // touchedUsers: Queue<User>;
+  touchedUsers: Queue<User>;
   userDetails: Record<string, UserDetail>; // user details: {id: UserDtail}
   isLoading: boolean;
   currentUser: User | null; //
@@ -26,7 +26,7 @@ const initialState: UsersState = {
   currentUser: null,
   nextUser: null,
   isLastPage: false,
-  // touchedUsers: new Queue<User>(),
+  touchedUsers: new Queue<User>(),
   userDetails: {},
 };
 
@@ -50,16 +50,11 @@ export const usersSlice = createSlice({
   name: 'users',
   initialState,
   reducers: {
-    getCurrentUser: state => {
-      state.currentUser = state.users.peek();
-    },
-    getNextUser: state => {
-      state.nextUser = state.users.peekNext();
-    },
     dequeueUser: state => {
       state.users.dequeue();
-      state.currentUser = state.users.peek();
-      state.nextUser = state.users.peekNext();
+    },
+    enqueueHistory: (state, action) => {
+      action.payload && state.touchedUsers.enqueue(action.payload);
     },
   },
   extraReducers: (builder: ActionReducerMapBuilder<UsersState>) => {
@@ -70,7 +65,7 @@ export const usersSlice = createSlice({
       .addCase(fetchUsersAsync.fulfilled, (state, action) => {
         const { total, data = [] } = action.payload;
         state.isLoading = false;
-        state.isLastPage = (state.page + 1) * LIMIT <= total;
+        state.isLastPage = (state.page + 1) * LIMIT >= total;
         if (action.payload?.data?.length) {
           state.page += 1;
           state.users.enqueues(data);
@@ -92,6 +87,14 @@ export const usersSlice = createSlice({
 
 export const currentUserSelector = (state: UsersState) => state.users.peek();
 export const nextUserSelector = (state: UsersState) => state.users.peekNext();
+export const currentHistoryUserSelector = (state: UsersState) =>
+  state.touchedUsers.peek();
+export const nextHistoryUserSelector = (state: UsersState) =>
+  state.touchedUsers.peekNext();
+export const touchedUsersSelector = (state: UsersState) => ({
+  touchedUsers: state.touchedUsers,
+  head: state.touchedUsers.getHead(),
+});
 export const pagingSelector = (state: UsersState) => ({
   page: state.page,
   isLastPage: state.isLastPage,
@@ -100,17 +103,16 @@ export const pagingSelector = (state: UsersState) => ({
 
 export const userDetaisSelector = (state: UsersState) => state.userDetails;
 
-export const { getNextUser, getCurrentUser, dequeueUser } = usersSlice.actions;
+export const { dequeueUser, enqueueHistory } = usersSlice.actions;
 export default usersSlice.reducer;
 
 export const onSwipe =
-  (isLeft: boolean) =>
+  (status: Status) =>
   (
     dispatch: (arg0: { payload: undefined; type: string }) => void,
-    // getState: () => UsersState,
+    getState: () => UsersState,
   ) => {
-    //const _currentUser = currentUserSelector(getState());
-    if (isLeft) {
-    }
+    const _currentUser = currentUserSelector(getState());
+    dispatch(enqueueHistory({ ..._currentUser, status }));
     dispatch(dequeueUser());
   };

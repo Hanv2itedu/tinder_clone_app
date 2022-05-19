@@ -1,36 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useSelector } from 'react-redux';
+import { CardDetailModal } from '../components/CardDetailModal';
 import CardsStack from '../components/CardsStack';
-import { TinderCard } from '../components/TinderCard';
-import { User } from '../types/users';
-
-const userFakes = [
-  {
-    firstName: 'Sara',
-    id: '60d0fe4f5311236168a109ca',
-    lastName: 'Andersen',
-    picture: 'https://randomuser.me/api/portraits/women/58.jpg',
-    title: 'ms',
-  },
-  {
-    firstName: 'Edita',
-    id: '60d0fe4f5311236168a109cb',
-    lastName: 'Vestering',
-    picture: 'https://randomuser.me/api/portraits/med/women/89.jpg',
-    title: 'miss',
-  },
-];
+import {
+  touchedUsersSelector,
+  userDetaisSelector,
+} from '../store/usersReducer';
 
 const History = () => {
+  const { touchedUsers } = useSelector(touchedUsersSelector);
+  const [index, setIndex] = useState(0);
+
+  const userDetails = useSelector(userDetaisSelector);
+
+  const [isModalShow, setModalShow] = useState(false);
+  const currentUser = touchedUsers.peekNext(index);
+  const nextUser = touchedUsers.peekNext(index + 1);
+
+  const onShowModal = () => setModalShow(true);
+  const onHideModal = () => setModalShow(false);
+
+  const currentProfile = currentUser
+    ? { ...currentUser, ...userDetails[currentUser.id] }
+    : null;
+
+  const onSwipe = () => {
+    setIndex(index + 1);
+  };
+
   return (
     <View style={styles.containerStyle}>
       <CardsStack
-        data={userFakes}
-        renderItem={({ item }: { item: User }) => (
-          <TinderCard data={item} onViewDetailPress={() => {}} />
-        )}
-        onSwipeLeft={() => {}}
-        onSwipeRight={() => {}}
+        currentProfile={currentProfile}
+        nextProfile={nextUser}
+        onViewDetailPress={onShowModal}
+        onSwipe={onSwipe}
+      />
+      <CardDetailModal
+        isVisble={isModalShow}
+        data={currentProfile}
+        onClose={onHideModal}
       />
     </View>
   );
@@ -40,5 +50,4 @@ export default History;
 
 const styles = StyleSheet.create({
   containerStyle: { flex: 1, padding: 20 },
-  // btnGr: { flexDirection: 'row', justifyContent: 'space-around' },
 });

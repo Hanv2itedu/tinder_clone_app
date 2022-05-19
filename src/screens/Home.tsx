@@ -3,7 +3,6 @@ import { StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { CardDetailModal } from '../components/CardDetailModal';
 import CardsStack from '../components/CardsStack';
-import { TinderCard } from '../components/TinderCard';
 import { IconButton } from '../core/IconButton';
 import {
   currentUserSelector,
@@ -14,7 +13,7 @@ import {
   pagingSelector,
   userDetaisSelector,
 } from '../store/usersReducer';
-import { User } from '../types/users';
+import { Status } from '../types/users';
 import { useAppDispatch } from '../utils/hook';
 
 const Home = () => {
@@ -37,7 +36,7 @@ const Home = () => {
   }, [isLastPage, queueLength, onLoadMore]);
 
   const _onSwipe = (isLeft: boolean = false) => {
-    dispatch(onSwipe(isLeft));
+    dispatch(onSwipe(isLeft ? Status.NOPED : Status.LIKED));
   };
 
   useEffect(() => {
@@ -56,20 +55,20 @@ const Home = () => {
       <CardsStack
         currentProfile={currentProfile}
         nextProfile={nextUser}
-        renderItem={(item: User) => (
-          <TinderCard data={item} onViewDetailPress={onShowModal} />
-        )}
         onSwipe={_onSwipe}
+        onViewDetailPress={onShowModal}
       />
-      <View style={styles.btnGr}>
-        <IconButton
-          iconName="close"
-          color="red"
-          onPress={() => _onSwipe(true)}
-        />
-        <IconButton iconName="star" color="blue" onPress={() => _onSwipe()} />
-        <IconButton iconName="heart" onPress={() => _onSwipe()} />
-      </View>
+      {queueLength > 0 && (
+        <View style={styles.btnGr}>
+          <IconButton
+            iconName="close"
+            color="red"
+            onPress={() => _onSwipe(true)}
+          />
+          <IconButton iconName="star" color="blue" onPress={() => _onSwipe()} />
+          <IconButton iconName="heart" onPress={() => _onSwipe()} />
+        </View>
+      )}
       <CardDetailModal
         isVisble={isModalShow}
         data={currentProfile}
