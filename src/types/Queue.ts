@@ -1,12 +1,19 @@
+type QueueConstructorType<T> = {
+  elements: Record<number, T>;
+  head: number;
+  tail: number;
+};
+
 export class Queue<T> {
   private elements: Record<number, T>;
   private head: number;
   private tail: number;
 
-  constructor() {
-    this.elements = {};
-    this.head = 0;
-    this.tail = 0;
+  constructor(queue?: QueueConstructorType<T> | undefined) {
+    const { elements = {}, head = 0, tail = 0 } = queue || {};
+    this.elements = elements;
+    this.head = head;
+    this.tail = tail;
   }
 
   enqueue(element: T) {

@@ -7,6 +7,7 @@ import moment from 'moment';
 import { fetchUserDetail, fetchUsers, LIMIT } from '../services/userApi';
 import { Queue } from '../types/Queue';
 import { Status, User, UserDetail } from '../types/users';
+import { RootState } from './configStore';
 
 export interface UsersState {
   page: number; // cursor for back-end data, prevent load the user twice or more
@@ -85,23 +86,21 @@ export const usersSlice = createSlice({
   },
 });
 
-export const currentUserSelector = (state: UsersState) => state.users.peek();
-export const nextUserSelector = (state: UsersState) => state.users.peekNext();
-export const currentHistoryUserSelector = (state: UsersState) =>
-  state.touchedUsers.peek();
-export const nextHistoryUserSelector = (state: UsersState) =>
-  state.touchedUsers.peekNext();
-export const touchedUsersSelector = (state: UsersState) => ({
-  touchedUsers: state.touchedUsers,
-  head: state.touchedUsers.getHead(),
+export const currentUserSelector = (state: RootState) =>
+  state.users.users.peek();
+export const nextUserSelector = (state: RootState) =>
+  state.users.users.peekNext();
+export const touchedUsersSelector = (state: RootState) => ({
+  touchedUsers: state.users.touchedUsers,
+  head: state.users.touchedUsers.getHead(),
 });
-export const pagingSelector = (state: UsersState) => ({
-  page: state.page,
-  isLastPage: state.isLastPage,
-  queueLength: state.users.length,
+export const pagingSelector = (state: RootState) => ({
+  page: state.users.page,
+  isLastPage: state.users.isLastPage,
+  queueLength: state.users.users.length,
 });
 
-export const userDetaisSelector = (state: UsersState) => state.userDetails;
+export const userDetaisSelector = (state: RootState) => state.users.userDetails;
 
 export const { dequeueUser, enqueueHistory } = usersSlice.actions;
 export default usersSlice.reducer;
@@ -110,7 +109,7 @@ export const onSwipe =
   (status: Status) =>
   (
     dispatch: (arg0: { payload: undefined; type: string }) => void,
-    getState: () => UsersState,
+    getState: () => RootState,
   ) => {
     const _currentUser = currentUserSelector(getState());
     dispatch(enqueueHistory({ ..._currentUser, status }));
