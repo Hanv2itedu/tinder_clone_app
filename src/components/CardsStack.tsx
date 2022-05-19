@@ -11,6 +11,7 @@ import {
   PanGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
 import Animated, {
+  Easing,
   interpolate,
   runOnJS,
   useAnimatedGestureHandler,
@@ -18,6 +19,7 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import { Status, User } from '../types/users';
 import { TinderCard } from './TinderCard';
@@ -31,12 +33,12 @@ const STATUS_COLORS = {
 const ROTATION = 60;
 
 type Context = Record<string, number>;
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 interface CardsStackProps {
   currentProfile?: User | null;
   nextProfile?: User | null;
-  onSwipe: (isLeft: boolean) => void;
+  onSwipe: (status: Status) => void;
   onViewDetailPress: () => void;
 }
 
@@ -47,6 +49,7 @@ const CardsStack = (props: CardsStackProps) => {
   const hiddenTranslateX = 2 * screenWidth;
 
   const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
   const startY = useSharedValue(0);
 
   const rotate = useDerivedValue(() => {
@@ -63,6 +66,9 @@ const CardsStack = (props: CardsStackProps) => {
     transform: [
       {
         translateX: translateX.value,
+      },
+      {
+        translateY: translateY.value,
       },
       {
         rotate: rotate.value,
@@ -103,27 +109,40 @@ const CardsStack = (props: CardsStackProps) => {
     },
     onActive: (event, context: Context) => {
       translateX.value = context.startX + event.translationX;
+      translateY.value = event.translationY;
       startY.value = context.startY;
     },
     onEnd: event => {
-      if (Math.abs(translateX.value) > 0.5 * screenWidth) {
+      if (translateY.value < -0.8 * cardHeight) {
+        translateY.value = withSpring(
+          -screenHeight * 2,
+          {},
+          () => (startY.value = 0),
+        );
+        onSwipe && runOnJS(onSwipe)(Status.SUPPER_LIKED);
+      } else if (Math.abs(translateX.value) > 0.5 * screenWidth) {
+        translateY.value = withTiming(0, {
+          duration: 100,
+          easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+        });
         translateX.value = withSpring(
           hiddenTranslateX * Math.sign(event.velocityX),
           {},
           () => (startY.value = 0),
         );
-        onSwipe && runOnJS(onSwipe)(event.velocityX < 0);
-        return;
+        onSwipe &&
+          runOnJS(onSwipe)(event.velocityX < 0 ? Status.NOPED : Status.LIKED);
       } else {
-        translateX.value = withSpring(0, {}, () => (startY.value = 0));
-        return;
+        translateX.value = withSpring(0);
+        translateY.value = withSpring(0, {}, () => (startY.value = 0));
       }
     },
   });
 
   useEffect(() => {
     translateX.value = 0;
-  }, [currentProfile, translateX]);
+    translateY.value = 0;
+  }, [currentProfile, translateX, translateY]);
 
   const onMeasureLayout = (event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;

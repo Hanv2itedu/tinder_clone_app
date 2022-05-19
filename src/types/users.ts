@@ -1,7 +1,7 @@
 export enum Status {
   LIKED = 'LIKED',
   NOPED = 'NOPED',
-  SUPPER_LIKED = 'SUPPER_LIKED',
+  SUPPER_LIKED = 'SUPPER',
 }
 
 export type User = {

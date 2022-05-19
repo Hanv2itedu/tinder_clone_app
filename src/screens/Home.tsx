@@ -35,8 +35,8 @@ const Home = () => {
     }
   }, [isLastPage, queueLength, onLoadMore]);
 
-  const _onSwipe = (isLeft: boolean = false) => {
-    dispatch(onSwipe(isLeft ? Status.NOPED : Status.LIKED));
+  const _onSwipe = (status: Status) => {
+    dispatch(onSwipe(status));
   };
 
   useEffect(() => {
@@ -63,10 +63,14 @@ const Home = () => {
           <IconButton
             iconName="close"
             color="red"
-            onPress={() => _onSwipe(true)}
+            onPress={() => _onSwipe(Status.NOPED)}
           />
-          <IconButton iconName="star" color="blue" onPress={() => _onSwipe()} />
-          <IconButton iconName="heart" onPress={() => _onSwipe()} />
+          <IconButton
+            iconName="star"
+            color="blue"
+            onPress={() => _onSwipe(Status.SUPPER_LIKED)}
+          />
+          <IconButton iconName="heart" onPress={() => _onSwipe(Status.LIKED)} />
         </View>
       )}
       <CardDetailModal
