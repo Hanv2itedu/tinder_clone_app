@@ -5,7 +5,7 @@ import {
   configureStore,
   ThunkAction,
 } from '@reduxjs/toolkit';
-import { persistReducer, persistStore, createMigrate } from 'redux-persist';
+import { persistReducer, persistStore } from 'redux-persist';
 import thunk from 'redux-thunk';
 import { Queue } from '../types/Queue';
 import { User } from '../types/users';
