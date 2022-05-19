@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import { PanGestureHandler } from 'react-native-gesture-handler';
+import { Dimensions, LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import {
+  PanGestureHandler,
+  PanGestureHandlerGestureEvent,
+} from 'react-native-gesture-handler';
 import Animated, {
   interpolate,
   runOnJS,
@@ -13,37 +16,35 @@ import Animated, {
 import { User } from '../types/users';
 
 const ROTATION = 60;
-const SWIPE_VELOCITY = 800;
 
 type Context = Record<string, number>;
+const { width: screenWidth } = Dimensions.get('window');
 
 interface CardsStackProps {
-  data: User[];
-  onSwipeLeft: (data: User) => void;
-  onSwipeRight: (data: User) => void;
+  currentProfile?: User | null;
+  nextProfile?: User | null;
+  onSwipe: (isLeft: boolean) => void;
   renderItem: Function;
 }
 
 const CardsStack = (props: CardsStackProps) => {
-  const { data, renderItem, onSwipeRight, onSwipeLeft } = props;
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-  // const [nextIndex, setNextIndex] = useState(currentIndex + 1);
-  const nextIndex = currentIndex + 1;
-
-  const currentProfile = data[currentIndex];
-  const nextProfile = data[nextIndex];
-
-  const { width: screenWidth } = useWindowDimensions();
+  const { renderItem, onSwipe, currentProfile, nextProfile } = props;
+  const [cardHeight, setCardHeight] = useState(0);
 
   const hiddenTranslateX = 2 * screenWidth;
 
   const translateX = useSharedValue(0);
-  const rotate = useDerivedValue(
-    () =>
-      interpolate(translateX.value, [0, hiddenTranslateX], [0, ROTATION]) +
-      'deg',
-  );
+  const startY = useSharedValue(0);
+
+  const rotate = useDerivedValue(() => {
+    return (
+      interpolate(
+        translateX.value,
+        [0, hiddenTranslateX],
+        [0, ROTATION * Math.sign(startY.value > cardHeight / 2 ? -1 : 1)],
+      ) + 'deg'
+    );
+  });
 
   const cardStyle = useAnimatedStyle(() => ({
     transform: [
@@ -54,6 +55,11 @@ const CardsStack = (props: CardsStackProps) => {
         rotate: rotate.value,
       },
     ],
+    opacity: interpolate(
+      translateX.value,
+      [-screenWidth, 0, screenWidth],
+      [0.4, 1, 0.4],
+    ),
   }));
 
   const nextCardStyle = useAnimatedStyle(() => ({
@@ -62,44 +68,54 @@ const CardsStack = (props: CardsStackProps) => {
         scale: interpolate(
           translateX.value,
           [-hiddenTranslateX, 0, hiddenTranslateX],
-          [1, 0.8, 1],
+          [1, 0.9, 1],
         ),
       },
     ],
     opacity: interpolate(
       translateX.value,
       [-hiddenTranslateX, 0, hiddenTranslateX],
-      [1, 0.5, 1],
+      [1, 0.8, 1],
     ),
   }));
 
-  const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, context: Context) => {
-      context.startX = translateX.value;
+  const gestureHandler = useAnimatedGestureHandler<
+    PanGestureHandlerGestureEvent,
+    Context
+  >({
+    onStart: (event, context: Context) => {
+      context.startX = 0;
+      context.startY = event.y;
+      startY.value = event.y;
     },
     onActive: (event, context: Context) => {
       translateX.value = context.startX + event.translationX;
+      startY.value = context.startY;
     },
     onEnd: event => {
-      if (Math.abs(event.velocityX) < SWIPE_VELOCITY) {
-        translateX.value = withSpring(0);
+      if (translateX.value > 0.5 * screenWidth) {
+        translateX.value = withSpring(
+          hiddenTranslateX * Math.sign(event.velocityX),
+          {},
+          () => (startY.value = 0),
+        );
+        onSwipe && runOnJS(onSwipe)(event.velocityX < 0);
+        return;
+      } else {
+        translateX.value = withSpring(0, {}, () => (startY.value = 0));
         return;
       }
-
-      translateX.value = withSpring(
-        hiddenTranslateX * Math.sign(event.velocityX),
-        {},
-        () => runOnJS(setCurrentIndex)(currentIndex + 1),
-      );
-
-      const onSwipe = event.velocityX > 0 ? onSwipeRight : onSwipeLeft;
-      onSwipe && runOnJS(onSwipe)(currentProfile);
     },
   });
 
   useEffect(() => {
     translateX.value = 0;
-  }, [currentIndex, translateX]);
+  }, [currentProfile, translateX]);
+
+  const onMeasureLayout = (event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout;
+    setCardHeight(height);
+  };
 
   return (
     <>
@@ -114,7 +130,9 @@ const CardsStack = (props: CardsStackProps) => {
 
         {currentProfile && (
           <PanGestureHandler onGestureEvent={gestureHandler}>
-            <Animated.View style={[styles.animatedCard, cardStyle]}>
+            <Animated.View
+              style={[styles.animatedCard, cardStyle]}
+              onLayout={onMeasureLayout}>
               {renderItem({ item: currentProfile })}
             </Animated.View>
           </PanGestureHandler>
@@ -132,8 +150,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   animatedCard: {
-    width: '90%',
-    height: '70%',
+    width: '100%',
+    height: '80%',
     justifyContent: 'center',
     alignItems: 'center',
   },

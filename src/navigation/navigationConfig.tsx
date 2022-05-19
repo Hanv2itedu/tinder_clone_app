@@ -55,7 +55,7 @@ const Tabs = () => {
       tabBar={(props: JSX.IntrinsicAttributes & BottomTabBarProps) => (
         <TabBar {...props} />
       )}
-      initialRouteName="HistoryTab">
+      initialRouteName="HomeTab">
       <Tab.Screen name="HomeTab" component={Home} />
       <Tab.Screen name="HistoryTab" component={History} />
     </Tab.Navigator>

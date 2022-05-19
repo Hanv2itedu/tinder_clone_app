@@ -24,7 +24,7 @@ export const TinderCard = (props: TinderCardProps) => {
   return (
     <View key={`TinderCard_${id}`} style={styles.cardContainer}>
       <ImageBackground
-        resizeMode="contain"
+        resizeMode="cover"
         source={{
           uri: picture,
         }}
@@ -54,10 +54,10 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 5,
+      height: 0,
     },
     shadowOpacity: 0.36,
-    shadowRadius: 6.68,
+    shadowRadius: 1,
     elevation: 11,
   },
   image: {
