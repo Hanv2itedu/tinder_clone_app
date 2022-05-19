@@ -3,7 +3,8 @@ import {
   createAsyncThunk,
   createSlice,
 } from '@reduxjs/toolkit';
-import { fetchUserDetail, fetchUsers } from '../services/userApi';
+import moment from 'moment';
+import { fetchUserDetail, fetchUsers, LIMIT } from '../services/userApi';
 import { Queue } from '../types/Queue';
 import { User, UserDetail } from '../types/users';
 
@@ -31,17 +32,17 @@ const initialState: UsersState = {
 
 export const fetchUsersAsync = createAsyncThunk(
   'users/fetchUsers',
-  async (page: number = 0): Promise<User[]> => {
-    const response = await fetchUsers(page);
-    return response.data;
+  async (page: number = 0): Promise<{ data: User[]; total: number }> => {
+    const { data = [], total } = await fetchUsers(page);
+    return { data, total };
   },
 );
 
-const fetchUserDetailAsync = createAsyncThunk(
+export const fetchUserDetailAsync = createAsyncThunk(
   'users/fetchUserDetail',
   async (userId: string): Promise<UserDetail> => {
     const response = await fetchUserDetail(userId);
-    return response.data;
+    return response;
   },
 );
 
@@ -67,23 +68,23 @@ export const usersSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(fetchUsersAsync.fulfilled, (state, action) => {
+        const { total, data = [] } = action.payload;
         state.isLoading = false;
-        if (action.payload?.length) {
+        state.isLastPage = (state.page + 1) * LIMIT <= total;
+        if (action.payload?.data?.length) {
           state.page += 1;
-          state.users.enqueues(action.payload || []);
-        } else {
-          state.isLastPage = true;
+          state.users.enqueues(data);
         }
       })
       .addCase(fetchUsersAsync.rejected, state => {
         state.isLoading = true;
       })
       .addCase(fetchUserDetailAsync.fulfilled, (state, action) => {
-        const { id } = action.payload;
+        const { id, dateOfBirth } = action.payload;
         state.isLoading = false;
         state.userDetails[id] = {
           ...action.payload,
-          fetchedDate: new Date().toISOString(),
+          age: moment().diff(dateOfBirth, 'year'),
         };
       });
   },
@@ -96,6 +97,8 @@ export const pagingSelector = (state: UsersState) => ({
   isLastPage: state.isLastPage,
   queueLength: state.users.length,
 });
+
+export const userDetaisSelector = (state: UsersState) => state.userDetails;
 
 export const { getNextUser, getCurrentUser, dequeueUser } = usersSlice.actions;
 export default usersSlice.reducer;

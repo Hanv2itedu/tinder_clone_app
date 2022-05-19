@@ -1,7 +1,11 @@
+import { User, UserDetail } from '../types/users';
 import API from './generalApi';
 
-const LIMIT = 20;
-export const fetchUsers = (page: number) =>
+export const LIMIT = 20;
+export const fetchUsers = (
+  page: number,
+): Promise<{ data: User[]; total: number }> =>
   API.get('/user', { params: { limit: LIMIT, page: page } });
 
-export const fetchUserDetail = (userId: string) => API.get(`/user/${userId}`);
+export const fetchUserDetail = (userId: string): Promise<UserDetail> =>
+  API.get(`/user/${userId}`);

@@ -15,6 +15,7 @@ const iconsMap = {
   close: require('../assets/close.png'),
   star: require('../assets/star.png'),
   heart: require('../assets/heart.png'),
+  drop: require('../assets/drop.png'),
 };
 
 export type IconNames = keyof typeof iconsMap;

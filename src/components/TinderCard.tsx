@@ -9,18 +9,18 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import { Icon } from '../core/Icon';
 import { User } from '../types/users';
+import { getName } from '../utils';
 
 interface TinderCardProps {
   data: User;
-  onViewDetailPress: Function;
+  onViewDetailPress: (user: User) => void;
 }
-
-const getName = (firstName: string, lastName: string): string => {
-  return firstName + ' ' + lastName;
-};
 
 export const TinderCard = (props: TinderCardProps) => {
   const { firstName, lastName, picture, id, age } = props.data;
+  const _onPress = () => {
+    props.onViewDetailPress?.(props.data);
+  };
   return (
     <View key={`TinderCard_${id}`} style={styles.cardContainer}>
       <ImageBackground
@@ -33,9 +33,11 @@ export const TinderCard = (props: TinderCardProps) => {
           colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.6)']}
           style={styles.linearView}>
           <View style={styles.detailContainer}>
-            <Text style={styles.name}>{getName(firstName, lastName)}</Text>
+            <Text numberOfLines={1} ellipsizeMode={'tail'} style={styles.name}>
+              {getName(firstName, lastName)}
+            </Text>
             <Text style={styles.age}>{String(age ?? '')}</Text>
-            <TouchableOpacity style={styles.inforIc}>
+            <TouchableOpacity onPress={_onPress} style={styles.inforIc}>
               <Icon name={'infor'} color="white" />
             </TouchableOpacity>
           </View>
@@ -68,8 +70,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   detailContainer: {
+    width: '100%',
     padding: 16,
     flexDirection: 'row',
+    alignItems: 'center',
   },
   linearView: {
     height: '20%',
@@ -79,11 +83,13 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: 'white',
     fontWeight: 'bold',
+    flex: 1,
   },
   age: {
-    fontSize: 18,
+    fontSize: 26,
     color: 'white',
-    lineHeight: 25,
+    fontWeight: 'bold',
+    marginLeft: 6,
   },
   inforIc: {
     padding: 8,

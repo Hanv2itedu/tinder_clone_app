@@ -123,7 +123,7 @@ const CardsStack = (props: CardsStackProps) => {
         {nextProfile && (
           <View style={styles.nextCardContainer}>
             <Animated.View style={[styles.animatedCard, nextCardStyle]}>
-              {renderItem({ item: nextProfile })}
+              {renderItem(nextProfile)}
             </Animated.View>
           </View>
         )}
@@ -133,7 +133,7 @@ const CardsStack = (props: CardsStackProps) => {
             <Animated.View
               style={[styles.animatedCard, cardStyle]}
               onLayout={onMeasureLayout}>
-              {renderItem({ item: currentProfile })}
+              {renderItem(currentProfile)}
             </Animated.View>
           </PanGestureHandler>
         )}

@@ -27,5 +27,5 @@ export type UserDetail = User & {
   email: string;
   gender: string;
   phone: string | number;
-  fetchedDate?: string;
+  location?: Location;
 };
