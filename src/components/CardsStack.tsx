@@ -142,7 +142,8 @@ const CardsStack = (props: CardsStackProps) => {
   useEffect(() => {
     translateX.value = 0;
     translateY.value = 0;
-  }, [currentProfile, translateX, translateY]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentProfile]);
 
   const onMeasureLayout = (event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;

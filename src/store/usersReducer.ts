@@ -73,15 +73,21 @@ export const usersSlice = createSlice({
         }
       })
       .addCase(fetchUsersAsync.rejected, state => {
+        state.isLoading = false;
+      })
+      .addCase(fetchUserDetailAsync.pending, state => {
         state.isLoading = true;
       })
       .addCase(fetchUserDetailAsync.fulfilled, (state, action) => {
         const { id, dateOfBirth } = action.payload;
-        state.isLoading = false;
+        state.isLoading = true;
         state.userDetails[id] = {
           ...action.payload,
           age: moment().diff(dateOfBirth, 'year'),
         };
+      })
+      .addCase(fetchUserDetailAsync.rejected, state => {
+        state.isLoading = false;
       });
   },
 });
@@ -94,11 +100,12 @@ export const touchedUsersSelector = (state: RootState) => ({
   touchedUsers: state.users.touchedUsers,
   head: state.users.touchedUsers.getHead(),
 });
-export const pagingSelector = (state: RootState) => ({
-  page: state.users.page,
-  isLastPage: state.users.isLastPage,
-  queueLength: state.users.users.length,
-});
+export const pagingSelector = (state: RootState) => {
+  return {
+    page: state.users.page,
+    isLastPage: state.users.isLastPage,
+  };
+};
 export const userDetaisSelector = (state: RootState) => state.users.userDetails;
 
 export const { dequeueUser, enqueueHistory } = usersSlice.actions;

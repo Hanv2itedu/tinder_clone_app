@@ -17,9 +17,12 @@ const persistConfig = {
   blackList: [],
   whiteList: ['users'],
   migrate: (state: any) => {
-    state.users.users = new Queue<User>(state.users.users);
-    state.users.touchedUsers = new Queue<User>(state.users.touchedUsers);
-    return Promise.resolve(state);
+    if (state.users) {
+      state.users.users = new Queue<User>(state.users.users);
+      state.users.touchedUsers = new Queue<User>(state.users.touchedUsers);
+      return Promise.resolve(state);
+    }
+    return Promise.resolve(null);
   },
 };
 
@@ -29,7 +32,7 @@ const persistedReducer = persistReducer(persistConfig, reducers);
 
 const store = configureStore({
   reducer: persistedReducer,
-  devTools: true, // TODO: check in env if DEV
+  devTools: false, // TODO: check in env if DEV
   middleware: [thunk],
 });
 
