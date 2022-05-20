@@ -32,7 +32,7 @@ Coderpush test assignment
 - [ ] Innovate the card animated render to avoid card sometime flicker after swipe.
 - [ ] Add animation for the button groups.
 - [ ] Add the text status with animation on card when user swipe right, left or top.
-- [ ] Improve fetch user detail to show the age immediately.
+- [x] Improve fetch user detail to show the age immediately.
 
 ### How to run this project:
 1. Clone this project.
