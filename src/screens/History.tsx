@@ -7,22 +7,20 @@ import {
   touchedUsersSelector,
   userDetaisSelector,
 } from '../store/usersReducer';
+import { useCardDetailModal } from '../utils/hook';
 
 const History = () => {
   const { touchedUsers } = useSelector(touchedUsersSelector);
   const userDetails = useSelector(userDetaisSelector);
+  const { isModalShow, onShowModal, onHideModal } = useCardDetailModal();
 
   const [index, setIndex] = useState(0);
-  const [isModalShow, setModalShow] = useState(false);
 
   const currentUser = touchedUsers.peekNext(index);
   const nextUser = touchedUsers.peekNext(index + 1);
   const currentProfile = currentUser
     ? { ...currentUser, ...userDetails[currentUser.id] }
     : null;
-
-  const onShowModal = () => setModalShow(true);
-  const onHideModal = () => setModalShow(false);
 
   const onSwipe = () => {
     setIndex(index + 1);

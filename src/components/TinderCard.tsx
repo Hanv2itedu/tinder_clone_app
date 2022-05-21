@@ -16,42 +16,51 @@ interface TinderCardProps {
   onViewDetailPress: (user: User) => void;
 }
 
-export const TinderCard = (props: TinderCardProps) => {
-  if (!props.data) {
-    return null;
-  }
+export const TinderCard = React.memo(
+  (props: TinderCardProps) => {
+    if (!props.data) {
+      return null;
+    }
 
-  const { firstName, lastName, picture, id, age } = props.data;
+    const { firstName, lastName, picture, id, age } = props.data;
+    console.log('rerender card', id, firstName);
 
-  const _onPress = () => {
-    props.onViewDetailPress?.(props.data);
-  };
+    const _onPress = () => {
+      props.onViewDetailPress?.(props.data);
+    };
 
-  return (
-    <View key={`TinderCard_${id}`} style={styles.cardContainer}>
-      <ImageBackground
-        resizeMode="cover"
-        source={{
-          uri: picture,
-        }}
-        style={styles.image}>
-        <LinearGradient
-          colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.6)']}
-          style={styles.linearView}>
-          <View style={styles.detailContainer}>
-            <Text numberOfLines={1} ellipsizeMode={'tail'} style={styles.name}>
-              {getName(firstName, lastName)}
-            </Text>
-            <Text style={styles.age}>{String(age ?? '')}</Text>
-            <TouchableOpacity onPress={_onPress} style={styles.inforIc}>
-              <Icon name={'infor'} color="white" />
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
-      </ImageBackground>
-    </View>
-  );
-};
+    return (
+      <View key={`TinderCard_${id}`} style={styles.cardContainer}>
+        <ImageBackground
+          resizeMode="cover"
+          source={{
+            uri: picture,
+          }}
+          style={styles.image}>
+          <LinearGradient
+            colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.6)']}
+            style={styles.linearView}>
+            <View style={styles.detailContainer}>
+              <Text
+                numberOfLines={1}
+                ellipsizeMode={'tail'}
+                style={styles.name}>
+                {getName(firstName, lastName)}
+              </Text>
+              <Text style={styles.age}>{String(age ?? '')}</Text>
+              <TouchableOpacity onPress={_onPress} style={styles.inforIc}>
+                <Icon name={'infor'} color="white" />
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+        </ImageBackground>
+      </View>
+    );
+  },
+  (prev, next) => {
+    return prev.data.id === next.data.id && prev.data.age === next.data.age;
+  },
+);
 
 const styles = StyleSheet.create({
   cardContainer: {

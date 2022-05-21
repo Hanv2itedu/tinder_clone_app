@@ -175,6 +175,7 @@ const CardsStack = (props: CardsStackProps) => {
           <View style={styles.nextCardContainer}>
             <Animated.View style={[styles.animatedCard, nextCardStyle]}>
               <TinderCard
+                key={nextProfile.id}
                 data={nextProfile}
                 onViewDetailPress={onViewDetailPress}
               />
@@ -188,6 +189,7 @@ const CardsStack = (props: CardsStackProps) => {
               style={[styles.animatedCard, cardStyle]}
               onLayout={onMeasureLayout}>
               <TinderCard
+                key={currentProfile.id}
                 data={currentProfile}
                 onViewDetailPress={onViewDetailPress}
               />

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import { CardDetailModal } from '../components/CardDetailModal';
@@ -15,10 +15,12 @@ import {
   userDetaisSelector,
 } from '../store/usersReducer';
 import { Status } from '../types/users';
-import { useAppDispatch } from '../utils/hook';
+import { useAppDispatch, useCardDetailModal } from '../utils/hook';
 
 const Home = () => {
   const dispatch = useAppDispatch();
+  const { isModalShow, onShowModal, onHideModal } = useCardDetailModal();
+
   const { page, isLastPage } = useSelector(pagingSelector);
   const queueLength = useSelector(
     (state: RootState) => state.users.users.length,
@@ -32,8 +34,6 @@ const Home = () => {
   const nextProfile = nextUser
     ? { ...nextUser, ...userDetails[nextUser.id] }
     : null;
-
-  const [isModalShow, setModalShow] = useState(false);
 
   const onLoadMore = useCallback(() => {
     !isLastPage && dispatch(fetchUsersAsync(page));
@@ -49,12 +49,9 @@ const Home = () => {
     if (!!currentUser && !userDetails[currentUser.id]) {
       dispatch(fetchUserDetailAsync(currentUser.id));
     }
-    dispatch(fetchUserDetailAsync(nextUser.id));
+    nextUser && dispatch(fetchUserDetailAsync(nextUser.id));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, dispatch]);
-
-  const onShowModal = () => setModalShow(true);
-  const onHideModal = () => setModalShow(false);
 
   const _onSwipe = (status: Status) => {
     dispatch(onSwipe(status));
